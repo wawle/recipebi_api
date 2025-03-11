@@ -9,8 +9,8 @@ import {
   resetPassword,
   updateDetails,
   updatePassword,
+  forgotPassword,
 } from "../controllers/auth";
-import { sendVerificationCodeSMS } from "../controllers/sms";
 
 const router = express.Router({ mergeParams: true });
 
@@ -20,7 +20,7 @@ router.get("/logout", logout);
 router.get("/me", protect, getMe);
 router.put("/updatedetails", protect, updateDetails);
 router.put("/updatepassword", protect, updatePassword);
-router.post("/forgotpassword", sendVerificationCodeSMS);
+router.post("/forgotpassword", forgotPassword);
 router.put("/resetpassword", resetPassword);
 
 export default router;
