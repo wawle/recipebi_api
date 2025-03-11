@@ -35,8 +35,6 @@ if (missingEnvVars.length > 0) {
 // Connect to database
 connectDB();
 
-// job files
-
 // Route files
 import authRouter from "./routes/auth";
 import usersRouter from "./routes/users";
