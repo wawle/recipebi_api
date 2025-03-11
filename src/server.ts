@@ -21,7 +21,7 @@ if (result.error) {
 }
 
 // Validate required environment variables
-const requiredEnvVars = ["JWT_SECRET", "JWT_EXPIRE", "MONGO_URI"];
+const requiredEnvVars = ["JWT_SECRET", "JWT_EXPIRE", "MONGO_URI", "PORT"];
 const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
