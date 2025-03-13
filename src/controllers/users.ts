@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import User from "../models/user";
 import asyncHandler from "../middleware/async";
-import ErrorResponse from "../utils/errorResponse";
+import ErrorResponse from "../utils/error-response";
 
 // @desc      Get all users
 // @route     GET /api/v1/users

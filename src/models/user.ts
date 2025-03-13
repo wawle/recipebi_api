@@ -3,23 +3,32 @@ import { Role } from "../utils/enums";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import CookBook, { ICookBookModal } from "./cook-book";
 
 export interface IUserModal extends Document {
   _id: string;
+  id: string;
   fullname: string;
   email: string;
   phone: string;
   role: Role;
+  photo: string;
+
   password?: string;
+  isVerified?: boolean;
   resetPasswordToken?: string;
   resetPasswordExpire?: Date;
   verificationCode?: string;
   verificationCodeExpire?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  cookBooks?: ICookBookModal[];
 
   // Instance methods
   getSignedJwtToken(): string;
   matchPassword(enteredPassword: string): Promise<boolean>;
   getResetPasswordToken(): string;
+  getVerificationCode(): string;
 }
 
 // Define static methods
@@ -51,6 +60,14 @@ const UserSchema: Schema<IUserModal> = new Schema(
       type: String,
       enum: [Role.Admin, Role.Manager, Role.User],
       default: Role.User,
+    },
+    photo: {
+      type: String,
+      default: "no-photo.jpg",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
     password: {
       type: String,
@@ -95,6 +112,13 @@ UserSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
+UserSchema.methods.getVerificationCode = function () {
+  const verificationCode = crypto.randomBytes(6).toString("hex");
+  this.verificationCode = verificationCode;
+  this.verificationCodeExpire = Date.now() + 10 * 60 * 1000;
+  return verificationCode;
+};
+
 // Encrypt password using bcrypt
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -103,6 +127,13 @@ UserSchema.pre("save", async function (next) {
   const password = this.password as string;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(password, salt);
+});
+
+UserSchema.post("save", async function (next) {
+  await CookBook.create({
+    user: this._id,
+    name: `${this.fullname} CookBook`,
+  });
 });
 
 // Mongoose modelini dışa aktarıyoruz

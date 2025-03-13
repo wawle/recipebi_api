@@ -38,7 +38,9 @@ connectDB();
 // Route files
 import authRouter from "./routes/auth";
 import usersRouter from "./routes/users";
-
+import cookBookRouter from "./routes/cook-book";
+import recipeRouter from "./routes/recipe";
+import libraryRouter from "./routes/library";
 const app = express();
 
 // Body parser
@@ -76,7 +78,9 @@ app.use(cors());
 app.use("/api/v1/auth", authRouter);
 // for admin actions
 app.use("/api/v1/users", usersRouter);
-
+app.use("/api/v1/cookbooks", cookBookRouter);
+app.use("/api/v1/recipes", recipeRouter);
+app.use("/api/v1/libraries", libraryRouter);
 app.use(errorHandler);
 
 const PORT = process.env.PORT;

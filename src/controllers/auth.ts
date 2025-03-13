@@ -1,9 +1,10 @@
 import { Response } from "express";
-import ErrorResponse from "../utils/errorResponse";
+import ErrorResponse from "../utils/error-response";
 import asyncHandler from "../middleware/async";
 import User, { IUserModal } from "../models/user"; // Assuming IUser is the User interface
 import { RequestWithUser } from "../middleware/auth";
 import { sendEmail } from "../utils/send-email";
+import crypto from "crypto";
 
 // Define a type for the request body for registration
 interface RegisterRequestBody {
@@ -139,24 +140,28 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
 });
 
 // @desc      Reset password
-// @route     PUT /api/v1/auth/resetpassword
+// @route     PUT /api/v1/auth/resetpassword/:resettoken
 // @access    Public
 export const resetPassword = asyncHandler(async (req, res, next) => {
-  const { phone, verificationCode, newPassword } = req.body;
+  // Get hashed token
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.resettoken)
+    .digest("hex");
 
   const user = await User.findOne({
-    phone,
-    verificationCode,
-    verificationCodeExpire: { $gt: Date.now() },
+    resetPasswordToken,
+    resetPasswordExpire: { $gt: Date.now() },
   });
 
   if (!user) {
-    return next(new ErrorResponse("Invalid or expired verification code", 400));
+    return next(new ErrorResponse("Invalid token", 400));
   }
 
-  user.password = newPassword;
-  user.verificationCode = undefined;
-  user.verificationCodeExpire = undefined;
+  // Set new password
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
   await user.save();
 
   sendTokenResponse(user, 200, res);
@@ -194,6 +199,8 @@ const sendTokenResponse = (
         fullname: user.fullname,
         email: user.email,
         role: user.role,
+        photo: user.photo,
+        isVerified: user.isVerified,
       },
     });
 };
@@ -218,7 +225,7 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     "host"
   )}/api/v1/auth/resetpassword/${resetToken}`;
 
-  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
+  const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please click on the following link to reset your password: \n\n ${resetUrl}`;
 
   try {
     await sendEmail({
@@ -240,4 +247,60 @@ export const forgotPassword = asyncHandler(async (req, res, next) => {
     success: true,
     data: user,
   });
+});
+
+export const sendVerificationCode = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return next(new ErrorResponse("There is no user with that email", 404));
+  }
+
+  const verificationCode = Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
+
+  const message = `Your verification code is ${verificationCode}`;
+  const options = {
+    email: user.email,
+    subject: "Verification code",
+    message,
+  };
+
+  try {
+    await sendEmail(options);
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpire = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save({ validateBeforeSave: false });
+  } catch (err) {
+    user.verificationCode = undefined;
+    user.verificationCodeExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new ErrorResponse("Email could not be sent", 500));
+  }
+
+  res.status(200).json({ success: true, data: "Verification code sent" });
+});
+
+export const verifyUser = asyncHandler(async (req, res, next) => {
+  const { email, verificationCode } = req.body;
+
+  const user = await User.findOne({
+    email,
+    verificationCode,
+    verificationCodeExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ErrorResponse("Invalid verification code", 400));
+  }
+
+  user.isVerified = true;
+  user.verificationCode = undefined;
+  user.verificationCodeExpire = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  res.status(200).json({ success: true, data: "Verification code verified" });
 });

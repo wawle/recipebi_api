@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "./async";
-import ErrorResponse from "../utils/errorResponse";
+import ErrorResponse from "../utils/error-response";
 import User, { IUserModal } from "../models/user";
 
 // Extend Express Request to include user property
@@ -56,7 +56,7 @@ export const authorize =
     if (!roles.includes(req.user.role)) {
       return next(
         new ErrorResponse(
-          `User role ${req.user.role} is not authorized to access this route`,
+          `User role (${req.user.role}) is not authorized to access this route`,
           403
         )
       );
