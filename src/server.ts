@@ -74,9 +74,6 @@ app.use(hpp());
 // Enable CORS
 app.use(cors());
 
-// Statik dosyaları serve et
-app.use(express.static(path.join(__dirname, "../public")));
-
 // Uploads klasörünün varlığını kontrol et ve yoksa oluştur
 const uploadsDir = path.join(__dirname, "../public/uploads");
 if (!fs.existsSync(path.join(__dirname, "../public"))) {
@@ -88,6 +85,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
   console.log("Uploads klasörü oluşturuldu");
 }
+
+// Statik dosyaları serve et
+// Ana public klasörü
+app.use(express.static(path.join(__dirname, "../public")));
+// Uploads klasörünü doğrudan /uploads yolundan erişilebilir yap
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
 // Mount routers
 // for current user actions

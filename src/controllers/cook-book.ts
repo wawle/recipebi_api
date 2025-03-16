@@ -149,7 +149,7 @@ export const uploadPhotoCookBook = asyncHandler(
     }
 
     const filePath = `uploads/${req.file.filename}`;
-
+    const fullUrl = `${req.protocol}://${req.get("host")}${filePath}`;
     cookBook.image = filePath;
 
     await cookBook.save();
@@ -157,6 +157,8 @@ export const uploadPhotoCookBook = asyncHandler(
     res.status(200).json({
       success: true,
       data: cookBook,
+      filePath: filePath,
+      fullUrl: fullUrl,
     });
   }
 );

@@ -138,6 +138,7 @@ export const uploadPhotoRecipe = asyncHandler(
     }
 
     const filePath = `uploads/${req.file.filename}`;
+    const fullUrl = `${req.protocol}://${req.get("host")}${filePath}`;
 
     recipe.image = filePath;
 
@@ -146,6 +147,8 @@ export const uploadPhotoRecipe = asyncHandler(
     res.status(200).json({
       success: true,
       data: recipe,
+      filePath: filePath,
+      fullUrl: fullUrl,
     });
   }
 );

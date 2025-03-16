@@ -148,8 +148,8 @@ export const uploadPhotoUser = asyncHandler(
       );
     }
 
-    // Dosya yolunu oluştur - Docker içinde çalışmaya uygun formatta
-    const filePath = `uploads/${req.file.filename}`;
+    // Dosya yolunu oluştur - url şeklinde direk erişilebilecek formatta
+    const filePath = `/uploads/${req.file.filename}`;
 
     // Kullanıcı fotoğrafını güncelle
     const updatedUser = await User.findByIdAndUpdate(
@@ -158,10 +158,13 @@ export const uploadPhotoUser = asyncHandler(
       { new: true, runValidators: true }
     );
 
+    const fullUrl = `${req.protocol}://${req.get("host")}${filePath}`;
+
     res.status(200).json({
       success: true,
       data: updatedUser,
-      filePath: filePath, // Dosya yolunu döndür
+      filePath: filePath,
+      fullUrl: fullUrl,
     });
   }
 );
