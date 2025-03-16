@@ -5,11 +5,14 @@ import {
   createCookBook,
   updateCookBook,
   deleteCookBook,
+  uploadPhotoCookBook,
 } from "../controllers/cook-book";
 import advancedResults from "../middleware/advanced-results";
 import { protect } from "../middleware/auth";
 import CookBook from "../models/cook-book";
 import libraryRouter from "./library";
+import upload from "../utils/file-upload";
+
 const router = express.Router({ mergeParams: true });
 
 router.use(protect);
@@ -28,5 +31,7 @@ router
   .get(getCookBook)
   .put(updateCookBook)
   .delete(deleteCookBook);
+
+router.route("/:id/photo").put(upload.single("photo"), uploadPhotoCookBook);
 
 export default router;

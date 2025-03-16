@@ -33,7 +33,7 @@ jobs:
                git pull origin main && \
                
                # Clean up and redeploy
-               docker compose down --volumes --remove-orphans && \
-               docker compose up --build -d
+               docker compose up --build -d && \
+               docker system prune -a --volumes --force
              "
            fi

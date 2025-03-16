@@ -127,3 +127,36 @@ export const deleteCookBook = asyncHandler(
     });
   }
 );
+
+// @desc      Upload cook book photo
+// @route     PUT /api/v1/cookbooks/:id/photo
+// @access    Private
+export const uploadPhotoCookBook = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.file) {
+      return next(new ErrorResponse("Please upload a file", 400));
+    }
+
+    const cookBook = await CookBook.findById(req.params.id);
+
+    if (!cookBook) {
+      return next(
+        new ErrorResponse(
+          `Cook book not found with id of ${req.params.id}`,
+          404
+        )
+      );
+    }
+
+    const filePath = `uploads/${req.file.filename}`;
+
+    cookBook.image = filePath;
+
+    await cookBook.save();
+
+    res.status(200).json({
+      success: true,
+      data: cookBook,
+    });
+  }
+);

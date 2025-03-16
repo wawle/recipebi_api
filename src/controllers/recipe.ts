@@ -119,3 +119,33 @@ export const deleteRecipe = asyncHandler(
     });
   }
 );
+
+// @desc      Upload recipe image
+// @route     PUT /api/v1/recipes/:id/image
+// @access    Private
+export const uploadPhotoRecipe = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.file) {
+      return next(new ErrorResponse("Please upload a file", 400));
+    }
+
+    const recipe = await Recipe.findById(req.params.id);
+
+    if (!recipe) {
+      return next(
+        new ErrorResponse(`Recipe not found with id of ${req.params.id}`, 404)
+      );
+    }
+
+    const filePath = `uploads/${req.file.filename}`;
+
+    recipe.image = filePath;
+
+    await recipe.save();
+
+    res.status(200).json({
+      success: true,
+      data: recipe,
+    });
+  }
+);

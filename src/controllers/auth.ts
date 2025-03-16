@@ -1,10 +1,11 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import ErrorResponse from "../utils/error-response";
 import asyncHandler from "../middleware/async";
 import User, { IUserModal } from "../models/user"; // Assuming IUser is the User interface
 import { RequestWithUser } from "../middleware/auth";
 import { sendEmail } from "../utils/send-email";
 import crypto from "crypto";
+import { Role } from "../utils/enums";
 
 // Define a type for the request body for registration
 interface RegisterRequestBody {
@@ -304,3 +305,37 @@ export const verifyUser = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: "Verification code verified" });
 });
+
+// @desc      Upload auth user photo
+// @route     PUT /api/v1/me/photo
+// @access    Private
+export const uploadPhoto = asyncHandler(
+  async (req: any, res: Response, next: NextFunction): Promise<void> => {
+    if (!req.file) {
+      return next(new ErrorResponse("Lütfen bir fotoğraf yükleyin", 400));
+    }
+
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return next(
+        new ErrorResponse(`${req.params.id} ID'li kullanıcı bulunamadı`, 404)
+      );
+    }
+
+    // Dosya yolunu oluştur
+    const filePath = `uploads/${req.file.filename}`;
+
+    // Kullanıcı fotoğrafını güncelle
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { photo: filePath },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      data: updatedUser,
+    });
+  }
+);

@@ -12,7 +12,9 @@ import {
   forgotPassword,
   sendVerificationCode,
   verifyUser,
+  uploadPhoto,
 } from "../controllers/auth";
+import upload from "../utils/file-upload";
 
 const router = express.Router({ mergeParams: true });
 
@@ -26,5 +28,6 @@ router.post("/forgotpassword", forgotPassword);
 router.put("/resetpassword/:resettoken", resetPassword);
 router.post("/sendverificationcode", sendVerificationCode);
 router.put("/verifyuser", verifyUser);
+router.route("/me/photo").put(protect, upload.single("photo"), uploadPhoto);
 
 export default router;

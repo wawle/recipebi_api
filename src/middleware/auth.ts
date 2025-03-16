@@ -52,11 +52,12 @@ export const protect = asyncHandler(async (req, res, next) => {
 // Grant access to specific roles
 export const authorize =
   (...roles: string[]) =>
-  (req: RequestWithUser, res: Response, next: NextFunction) => {
-    if (!roles.includes(req.user.role)) {
+  (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as RequestWithUser).user;
+    if (!roles.includes(user.role)) {
       return next(
         new ErrorResponse(
-          `User role (${req.user.role}) is not authorized to access this route`,
+          `User role (${user.role}) is not authorized to access this route`,
           403
         )
       );
