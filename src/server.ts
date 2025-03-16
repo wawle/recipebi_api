@@ -10,6 +10,7 @@ import hpp from "hpp";
 import cors from "cors";
 import errorHandler from "./middleware/error";
 import connectDB from "./config/db";
+import fs from "fs";
 
 // Load env vars
 const envPath = path.join(__dirname, "config", "config.env");
@@ -75,6 +76,18 @@ app.use(cors());
 
 // Statik dosyaları serve et
 app.use(express.static(path.join(__dirname, "../public")));
+
+// Uploads klasörünün varlığını kontrol et ve yoksa oluştur
+const uploadsDir = path.join(__dirname, "../public/uploads");
+if (!fs.existsSync(path.join(__dirname, "../public"))) {
+  fs.mkdirSync(path.join(__dirname, "../public"), { recursive: true });
+  console.log("Public klasörü oluşturuldu");
+}
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log("Uploads klasörü oluşturuldu");
+}
 
 // Mount routers
 // for current user actions

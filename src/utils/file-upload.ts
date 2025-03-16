@@ -2,11 +2,24 @@ import path from "path";
 import multer from "multer";
 import { Request } from "express";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+
+// Uploads dizinini kontrol et
+const uploadsDir = path.join(__dirname, "../../public/uploads");
 
 // Storage konfigürasyonu
 const storage = multer.diskStorage({
   destination: (req: Request, file: Express.Multer.File, cb) => {
-    cb(null, path.join(__dirname, "../../public/uploads"));
+    // Klasörlerin varlığını kontrol et ve yoksa oluştur
+    if (!fs.existsSync(path.join(__dirname, "../../public"))) {
+      fs.mkdirSync(path.join(__dirname, "../../public"), { recursive: true });
+    }
+
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    cb(null, uploadsDir);
   },
   filename: (req: Request, file: Express.Multer.File, cb) => {
     // Dosya ismini benzersiz hale getiriyoruz
