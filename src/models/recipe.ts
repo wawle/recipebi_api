@@ -13,12 +13,7 @@ export interface IRecipeModal extends Document {
   ingredients: string[];
   instructions: string[];
   user: IUserModal;
-  details: {
-    difficulty: Difficulty;
-    dietType?: DietType;
-    cuisineType?: CuisineType;
-    mealType?: MealType;
-  };
+  details: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -50,27 +45,9 @@ const RecipeSchema: Schema<IRecipeModal> = new Schema(
       required: [true, "Please add instructions"],
     },
     details: {
-      difficulty: {
-        type: String,
-        required: [true, "Please add a difficulty"],
-        enum: Object.values(Difficulty),
-        default: Difficulty.Easy,
-      },
-      dietType: {
-        type: String,
-        enum: Object.values(DietType),
-        required: false,
-      },
-      cuisineType: {
-        type: String,
-        enum: Object.values(CuisineType),
-        required: false,
-      },
-      mealType: {
-        type: String,
-        enum: Object.values(MealType),
-        required: false,
-      },
+      type: Schema.Types.Mixed,
+      required: false,
+      default: {},
     },
     user: {
       type: mongoose.Schema.ObjectId,
@@ -78,7 +55,11 @@ const RecipeSchema: Schema<IRecipeModal> = new Schema(
       required: true,
     },
   },
-  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
 );
 
 RecipeSchema.index({ name: "text", description: "text" });
@@ -93,6 +74,9 @@ RecipeSchema.virtual("cookbooks", {
 });
 
 // Mongoose modelini dışa aktarıyoruz
-const Recipe = mongoose.model<IRecipeModal, IRecipe>("Recipe", RecipeSchema);
+const Recipe = mongoose.model<IRecipeModal, IRecipe>(
+  "Recipe",
+  RecipeSchema
+);
 
 export default Recipe;
