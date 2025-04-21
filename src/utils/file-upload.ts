@@ -12,7 +12,9 @@ const storage = multer.diskStorage({
   destination: (req: Request, file: Express.Multer.File, cb) => {
     // Klasörlerin varlığını kontrol et ve yoksa oluştur
     if (!fs.existsSync(path.join(__dirname, "../../public"))) {
-      fs.mkdirSync(path.join(__dirname, "../../public"), { recursive: true });
+      fs.mkdirSync(path.join(__dirname, "../../public"), {
+        recursive: true,
+      });
     }
 
     if (!fs.existsSync(uploadsDir)) {
@@ -55,7 +57,7 @@ const fileFilter = (
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB maksimum dosya boyutu
+    fileSize: 10 * 1024 * 1024, // 5MB maksimum dosya boyutu
   },
   fileFilter,
 });
