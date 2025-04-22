@@ -5,7 +5,6 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import mongoSanitize from "express-mongo-sanitize";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import hpp from "hpp";
 import cors from "cors";
 import errorHandler from "./middleware/error";
@@ -23,7 +22,9 @@ if (result.error) {
 
 // Validate required environment variables
 const requiredEnvVars = ["JWT_SECRET", "JWT_EXPIRE", "MONGO_URI", "PORT"];
-const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+const missingEnvVars = requiredEnvVars.filter(
+  (envVar) => !process.env[envVar]
+);
 
 if (missingEnvVars.length > 0) {
   console.error(
@@ -61,13 +62,6 @@ app.use(mongoSanitize());
 // Set security headers
 app.use(helmet());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 mins
-  max: 100,
-});
-app.use(limiter);
-
 // Prevent HTTP parameter pollution
 app.use(hpp());
 
@@ -90,7 +84,10 @@ if (!fs.existsSync(uploadsDir)) {
 // Ana public klasörü
 app.use(express.static(path.join(__dirname, "../public")));
 // Uploads klasörünü doğrudan /uploads yolundan erişilebilir yap
-app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../public/uploads"))
+);
 
 // Mount routers
 // for current user actions
@@ -105,7 +102,9 @@ app.use(errorHandler);
 const PORT = process.env.PORT;
 
 app.listen(PORT, () =>
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`)
+  console.log(
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
+  )
 );
 
 // Handle unhandled promise rejections
