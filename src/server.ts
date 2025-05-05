@@ -43,6 +43,7 @@ import usersRouter from "./routes/users";
 import cookBookRouter from "./routes/cook-book";
 import recipeRouter from "./routes/recipe";
 import libraryRouter from "./routes/library";
+import ingredientRouter from "./routes/ingredient";
 const app = express();
 
 // Body parser
@@ -97,6 +98,7 @@ app.use("/api/v1/users", usersRouter);
 app.use("/api/v1/cookbooks", cookBookRouter);
 app.use("/api/v1/recipes", recipeRouter);
 app.use("/api/v1/libraries", libraryRouter);
+app.use("/api/v1/ingredients", ingredientRouter);
 app.use(errorHandler);
 
 const PORT = process.env.PORT;
